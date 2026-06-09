@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace WorldGen
 {
@@ -6,12 +7,16 @@ namespace WorldGen
     {
         [Header("Generation Settings")]
         [SerializeField] private GameObject cubePrefab;
-        [SerializeField] private int width = 30;
-        [SerializeField] private int depth = 30;
+        [SerializeField] private int renderDistance = 20;
         [SerializeField] private float heightMultiplier = 10f;
         [SerializeField] private float noiseScale = 0.1f;
-        [SerializeField] private float offsetX;
-        [SerializeField] private float offsetZ;
+        
+        [Header("Target")]
+        [SerializeField] private Transform playerTransform;
+
+        private float offsetX;
+        private float offsetZ;
+        private HashSet<Vector2Int> generatedColumns = new HashSet<Vector2Int>();
 
         private void Awake()
         {
@@ -21,34 +26,49 @@ namespace WorldGen
 
         private void Start()
         {
-            GenerateWorld();
+            if (playerTransform == null)
+            {
+                GameObject player = GameObject.Find("Player");
+                if (player != null) playerTransform = player.transform;
+            }
+            
+            // Clear any editor-generated world objects
+            ClearWorld();
         }
 
-        [ContextMenu("Regenerate World")]
-        public void GenerateWorld()
+        private void Update()
         {
-            ClearWorld();
+            if (playerTransform == null) return;
 
-            if (cubePrefab == null)
+            Vector3 playerPos = playerTransform.position;
+            int playerX = Mathf.FloorToInt(playerPos.x);
+            int playerZ = Mathf.FloorToInt(playerPos.z);
+            
+            for (int x = playerX - renderDistance; x <= playerX + renderDistance; x++)
             {
-                Debug.LogError("WorldGenerator: Cube Prefab is not assigned!");
-                return;
-            }
-
-            for (int x = 0; x < width; x++)
-            {
-                for (int z = 0; z < depth; z++)
+                for (int z = playerZ - renderDistance; z <= playerZ + renderDistance; z++)
                 {
-                    int height = Mathf.FloorToInt(CalculateHeight(x, z));
-                    
-                    // Fill from 0 up to height to give it a solid look
-                    for (int y = 0; y <= height; y++)
+                    Vector2Int columnPos = new Vector2Int(x, z);
+                    if (!generatedColumns.Contains(columnPos))
                     {
-                        Vector3 pos = new Vector3(x, y, z);
-                        GameObject cube = Instantiate(cubePrefab, pos, Quaternion.identity, transform);
-                        cube.name = $"Cube_{x}_{y}_{z}";
+                        GenerateColumn(x, z);
+                        generatedColumns.Add(columnPos);
                     }
                 }
+            }
+        }
+
+        private void GenerateColumn(int x, int z)
+        {
+            if (cubePrefab == null) return;
+
+            int height = Mathf.FloorToInt(CalculateHeight(x, z));
+            
+            for (int y = 0; y <= height; y++)
+            {
+                Vector3 pos = new Vector3(x, y, z);
+                GameObject cube = Instantiate(cubePrefab, pos, Quaternion.identity, transform);
+                cube.name = $"Cube_{x}_{y}_{z}";
             }
         }
 
@@ -60,9 +80,10 @@ namespace WorldGen
             return Mathf.PerlinNoise(xCoord, zCoord) * heightMultiplier;
         }
 
+        [ContextMenu("Clear World")]
         public void ClearWorld()
         {
-            // Use a reverse loop so the index stays valid as you remove items
+            generatedColumns.Clear();
             for (int i = transform.childCount - 1; i >= 0; i--)
             {
                 GameObject child = transform.GetChild(i).gameObject;
