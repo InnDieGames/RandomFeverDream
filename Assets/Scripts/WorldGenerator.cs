@@ -62,16 +62,17 @@ namespace WorldGen
 
         public void ClearWorld()
         {
-            // Using a while loop to ensure all children are destroyed in editor or runtime
-            while (transform.childCount > 0)
+            // Use a reverse loop so the index stays valid as you remove items
+            for (int i = transform.childCount - 1; i >= 0; i--)
             {
+                GameObject child = transform.GetChild(i).gameObject;
                 if (Application.isPlaying)
                 {
-                    Destroy(transform.GetChild(0).gameObject);
+                    Destroy(child);
                 }
                 else
                 {
-                    DestroyImmediate(transform.GetChild(0).gameObject);
+                    DestroyImmediate(child);
                 }
             }
         }
