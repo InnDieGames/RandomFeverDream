@@ -150,7 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldGen.WorldGenerator
   cubePrefab: {fileID: 1452180585292840020, guid: 4d6e9e3e29212014d8f8abe0e15526d8, type: 3}
   renderDistance: 40
-  unloadBuffer: 15
+  unloadBuffer: 20
   playerTransform: {fileID: 823009537}
   seed: 42
   biomeNoiseScale: 0.015
