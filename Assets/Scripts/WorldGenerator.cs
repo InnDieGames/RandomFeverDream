@@ -41,7 +41,33 @@ namespace WorldGen
         private void Update()
         {
             if (playerTransform == null) return;
+            
+            GenerateWorldNearPlayer();
 
+            // Periodically clean up far columns
+            cleanupTimer += Time.deltaTime;
+            if (cleanupTimer >= cleanupInterval)
+            {
+                UnloadFarColumns();
+                cleanupTimer = 0f;
+            }
+        }
+
+        [ContextMenu("GenerateWorldNearPlayer")]
+        private void GenerateWorldNearPlayerEditor()
+        {
+            if (playerTransform == null)
+            {
+                GameObject player = GameObject.Find("Player");
+                if (player != null) playerTransform = player.transform;
+            }
+            GenerateWorldNearPlayer();
+        }
+        
+        private void GenerateWorldNearPlayer()
+        {
+            if (cubePrefab == null) return;
+            
             Vector3 playerPos = playerTransform.position;
             int playerX = Mathf.FloorToInt(playerPos.x);
             int playerZ = Mathf.FloorToInt(playerPos.z);
@@ -58,20 +84,10 @@ namespace WorldGen
                     }
                 }
             }
-
-            // Periodically clean up far columns
-            cleanupTimer += Time.deltaTime;
-            if (cleanupTimer >= cleanupInterval)
-            {
-                UnloadFarColumns(playerX, playerZ);
-                cleanupTimer = 0f;
-            }
         }
 
         private void GenerateColumn(int x, int z)
         {
-            if (cubePrefab == null) return;
-
             int height = Mathf.FloorToInt(CalculateHeight(x, z));
             List<GameObject> columnCubes = new List<GameObject>();
             
@@ -86,8 +102,12 @@ namespace WorldGen
             activeColumns.Add(new Vector2Int(x, z), columnCubes);
         }
 
-        private void UnloadFarColumns(int playerX, int playerZ)
+        private void UnloadFarColumns()
         {
+            Vector3 playerPos = playerTransform.position;
+            int playerX = Mathf.FloorToInt(playerPos.x);
+            int playerZ = Mathf.FloorToInt(playerPos.z);
+            
             float unloadDistanceSq = Mathf.Pow(renderDistance + unloadBuffer, 2);
             List<Vector2Int> toRemove = new List<Vector2Int>();
 
