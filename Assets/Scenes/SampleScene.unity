@@ -151,9 +151,38 @@ MonoBehaviour:
   cubePrefab: {fileID: 1452180585292840020, guid: 4d6e9e3e29212014d8f8abe0e15526d8, type: 3}
   renderDistance: 40
   unloadBuffer: 15
-  heightMultiplier: 20
-  noiseScale: 0.04
-  playerTransform: {fileID: 0}
+  playerTransform: {fileID: 823009537}
+  seed: 42
+  biomeNoiseScale: 0.015
+  biomeCount: 8
+  biomes:
+  - name: Ocean
+    threshold: 0
+    heightMultiplier: 2
+    noiseScale: 0.03
+    colorStart: {r: 0, g: 0.1, b: 0.4, a: 1}
+    colorEnd: {r: 0.1, g: 0.5, b: 0.8, a: 1}
+  - name: Forest
+    threshold: 0.3
+    heightMultiplier: 7
+    noiseScale: 0.06
+    colorStart: {r: 0.1, g: 0.3, b: 0.1, a: 1}
+    colorEnd: {r: 0.4, g: 0.7, b: 0.2, a: 1}
+  - name: Desert
+    threshold: 0.6
+    heightMultiplier: 5
+    noiseScale: 0.04
+    colorStart: {r: 0.6, g: 0.4, b: 0.2, a: 1}
+    colorEnd: {r: 0.9, g: 0.8, b: 0.5, a: 1}
+  - name: Peaks
+    threshold: 0.8
+    heightMultiplier: 15
+    noiseScale: 0.08
+    colorStart: {r: 0.2, g: 0.2, b: 0.3, a: 1}
+    colorEnd: {r: 0.95, g: 0.95, b: 1, a: 1}
+  hueJitter: 0.02
+  satJitter: 0.05
+  valJitter: 0.08
 --- !u!4 &161213944
 Transform:
   m_ObjectHideFlags: 0
